@@ -1,0 +1,1030 @@
+/* ==========================================================================
+   Third Pour – style.css
+
+   Contents
+   1.  Design tokens (fonts, colour themes)
+   2.  Base styles
+   3.  Preloader and scroll progress bar
+   4.  Header and navigation
+   5.  Buttons
+   6.  Hero
+   7.  Marquee strip
+   8.  Reveal-on-scroll
+   9.  Philosophy
+   10. Menu (tabs and list)
+   11. Bakery feature
+   12. Call to action
+   13. Find us (hours, map, social links)
+   14. Footer and toast
+   15. Responsive (max-width: 760px)
+   16. Reduced motion and utilities
+   17. Cart page
+   18. Page-transition veil
+   19. Cart responsive (max-width: 760px)
+   ========================================================================== */
+
+
+/* ---------- 1. Design tokens ---------- */
+
+:root {
+    --d: "Cormorant Garamond", Georgia, serif;          /* display / headings */
+    --m: "Jost", system-ui, -apple-system, sans-serif;  /* body / UI text */
+
+    /* Hero background. Replace with e.g. url("hero.jpg") to use a real photo. */
+    --photo: linear-gradient(135deg, #3B2417, #6B4226 60%, #B9763A);
+}
+
+/* Colour themes. <body data-theme="..."> is swapped by script.js while scrolling. */
+body[data-theme="white"]    { --bg: #FBF8F4; --fg: #3B2417; --acc: #8B5A3C; }
+body[data-theme="latte"]    { --bg: #E9D8C4; --fg: #3B2417; --acc: #6B4226; }
+body[data-theme="espresso"] { --bg: #1F120B; --fg: #FBF8F4; --acc: #D9B38C; }
+
+
+/* ---------- 2. Base styles ---------- */
+
+html {
+    scroll-behavior: smooth;
+    scroll-padding-top: 4.5rem; /* keeps anchor targets clear of the fixed header */
+}
+
+body {
+    margin: 0;
+    font: 300 1.1rem/1.6 var(--m);
+    background: var(--bg);
+    color: var(--fg);
+    transition: background-color 0.9s, color 0.9s; /* smooth theme changes */
+    overflow-x: hidden;
+}
+
+h1, h2, h3 {
+    font-family: var(--d);
+    font-weight: 500;
+    margin: 0;
+    line-height: 1;
+}
+
+h2 {
+    font-size: clamp(2.6rem, 6vw, 5rem);
+    letter-spacing: -0.01em;
+}
+
+a { color: inherit; }
+
+:focus-visible {
+    outline: 2px solid var(--acc);
+    outline-offset: 3px;
+}
+
+section {
+    padding: 7rem clamp(1.2rem, 5vw, 4rem);
+    position: relative;
+}
+
+
+/* ---------- 3. Preloader and scroll progress bar ---------- */
+
+#ld {
+    position: fixed;
+    inset: 0;
+    z-index: 100;
+    background: #1F120B;
+    color: #FBF8F4;
+    display: grid;
+    place-content: center;
+    justify-items: center;
+    gap: 1.2rem;
+    transition: transform 1s cubic-bezier(0.7, 0, 0.2, 1);
+}
+
+#ld.done { transform: translateY(-100%); } /* slides away when loading finishes */
+
+#ld b {
+    font: 500 clamp(2.5rem, 8vw, 4.5rem) var(--d);
+    letter-spacing: 0.02em;
+}
+
+/* Loading bar track */
+#ld i {
+    display: block;
+    width: 12rem;
+    height: 2px;
+    background: #FBF8F433;
+    overflow: hidden;
+}
+
+/* Loading bar fill */
+#ld i::after {
+    content: "";
+    display: block;
+    height: 100%;
+    background: #D9B38C;
+    transform: translateX(-100%);
+    animation: load-fill 1.6s ease forwards;
+}
+
+@keyframes load-fill { to { transform: none; } }
+
+/* Reading-progress bar (scaleX is set from script.js) */
+#bar {
+    position: fixed;
+    top: 0;
+    left: 0;
+    height: 3px;
+    width: 100%;
+    background: var(--acc);
+    transform: scaleX(0);
+    transform-origin: 0 50%;
+    z-index: 70;
+}
+
+
+/* ---------- 4. Header and navigation ---------- */
+
+header {
+    position: fixed;
+    inset: 0 0 auto;
+    z-index: 60;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 1.1rem clamp(1.2rem, 5vw, 4rem);
+    padding-top: calc(1.1rem + env(safe-area-inset-top, 0px)); /* notch-safe on phones */
+    transition: background 0.4s;
+}
+
+/* Added by script.js after scrolling: frosted-glass background */
+header.s {
+    background: color-mix(in srgb, var(--bg) 85%, transparent);
+    backdrop-filter: blur(10px);
+}
+
+.logo {
+    font: 500 1.6rem var(--d);
+    text-decoration: none;
+    letter-spacing: 0.02em;
+}
+
+nav {
+    display: flex;
+    gap: clamp(0.9rem, 3vw, 2.2rem);
+    align-items: center;
+}
+
+/* Nav links with an underline that grows on hover */
+nav a:not(.btn) {
+    font-size: 0.95rem;
+    letter-spacing: 0.06em;
+    text-decoration: none;
+    padding-bottom: 3px;
+    background: linear-gradient(currentColor, currentColor) 0 100% / 0 1px no-repeat;
+    transition: background-size 0.4s;
+}
+
+nav a:not(.btn):hover { background-size: 100% 1px; }
+
+/* Cart count badge: "bump" animation when the count changes */
+#cnt.b { animation: bump 0.4s; }
+@keyframes bump { 40% { transform: scale(1.4); } }
+
+
+/* ---------- 5. Buttons ---------- */
+
+.btn {
+    display: inline-block;
+    font: 400 1rem var(--m);
+    letter-spacing: 0.08em;
+    color: inherit;
+    background: none;
+    border: 1px solid currentColor;
+    padding: 0.7rem;
+    border-radius: 99px;
+    text-decoration: none;
+    position: relative;
+    overflow: hidden;
+    isolation: isolate;
+    cursor: pointer;
+    transition: color 0.4s, translate 0.25s;
+}
+
+/* Fill that rises from the bottom on hover */
+.btn::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background: var(--fg);
+    transform: translateY(101%);
+    transition: transform 0.4s;
+    z-index: -1;
+}
+
+.btn:hover::before { transform: none; }
+.btn:hover { color: var(--bg); }
+
+.btn.sm {
+    padding: 0.45rem 1.2rem;
+    font-size: 0.9rem;
+}
+
+
+/* ---------- 6. Hero ---------- */
+
+#hero {
+    min-height: 100svh;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    overflow: hidden;
+    color: #FBF8F4;
+    padding-top: 8rem;
+}
+
+/* Background image layer (moved by script.js for parallax) */
+.bg {
+    position: absolute;
+    inset: -8% 0;
+    background: var(--photo) 72% 50% / cover;
+    will-change: transform;
+}
+
+/* Dark gradient overlay for text legibility */
+#hero::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    z-index: 1;
+    background:
+        linear-gradient(90deg, #1F120Bee, #1F120B99 45%, #1F120B1f 88%),
+        linear-gradient(#1F120B77, transparent 30%);
+}
+
+#hero > *:not(.bg) {
+    position: relative;
+    z-index: 2;
+}
+
+#hero h1 {
+    font-size: clamp(3rem, 8.6vw, 8rem);
+    font-weight: 400;
+    letter-spacing: -0.025em;
+}
+
+/* Headline lines: each line is a mask; the inner span slides up into view */
+.ln {
+    display: block;
+    overflow: hidden;
+    padding: 0.12em 0 0.06em;
+    margin: -0.05em 0;
+}
+
+.ln span {
+    display: inline-block;
+    transform: translateY(115%);
+}
+
+/* body.go is added by script.js after the preloader finishes */
+body.go .ln span {
+    animation: slide-up 1s cubic-bezier(0.2, 0.9, 0.2, 1) forwards;
+    animation-delay: calc(0.2s + var(--i) * 0.12s);
+}
+
+@keyframes slide-up { to { transform: none; } }
+
+/* Simple fade-in with a stagger driven by --i */
+.fd { opacity: 0; }
+
+body.go .fd {
+    animation: fade-in 0.9s forwards;
+    animation-delay: calc(1s + var(--i, 0) * 0.15s);
+}
+
+@keyframes fade-in { to { opacity: 1; } }
+
+#hero q {
+    display: block;
+    font: italic 400 clamp(1.3rem, 2.4vw, 1.9rem)/1.3 var(--d);
+    max-width: 26ch;
+    margin: 1.8rem 0 2.2rem;
+    quotes: none;
+}
+
+/* Animated "scroll down" line */
+.cue {
+    position: absolute !important;
+    bottom: 2rem;
+    left: clamp(1.2rem, 5vw, 4rem);
+    width: 1px;
+    height: 4.5rem;
+    background: #FBF8F444;
+    overflow: hidden;
+}
+
+.cue::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background: #FBF8F4;
+    animation: drop 2s ease-in-out infinite;
+}
+
+@keyframes drop {
+    0%        { transform: translateY(-100%); }
+    60%, 100% { transform: translateY(100%); }
+}
+
+
+/* ---------- 7. Marquee strip ---------- */
+
+.mq {
+    background: #3B2417;
+    color: #FBF8F4;
+    overflow: hidden;
+    white-space: nowrap;
+    padding: 1.1rem 0;
+    font: italic 500 clamp(1.5rem, 3.2vw, 2.4rem) var(--d);
+}
+
+/* The content is repeated in the HTML, so scrolling by -50% loops seamlessly */
+.mq div {
+    display: inline-block;
+    animation: marquee 32s linear infinite;
+}
+
+.mq span { margin: 0 1.6rem; }
+
+.mq b {
+    display: inline-block;
+    width: 0.45rem;
+    height: 0.45rem;
+    border-radius: 50%;
+    background: #D9B38C;
+    vertical-align: middle;
+}
+
+@keyframes marquee { to { transform: translateX(-50%); } }
+
+
+/* ---------- 8. Reveal-on-scroll ---------- */
+/* .in is added by script.js when the element enters the viewport; --k staggers siblings */
+
+.rv {
+    opacity: 0;
+    transform: translateY(40px);
+    transition: opacity 0.9s, transform 0.9s cubic-bezier(0.2, 0.9, 0.2, 1);
+    transition-delay: calc(var(--k, 0) * 0.12s);
+}
+
+.rv.in {
+    opacity: 1;
+    transform: none;
+}
+
+
+/* ---------- 9. Philosophy ---------- */
+
+.two {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 3rem;
+    align-items: end;
+}
+
+.lead {
+    font: 400 clamp(1.4rem, 2.4vw, 2rem)/1.35 var(--d);
+    margin: 0;
+    max-width: 30ch;
+}
+
+/* Three pillars */
+.pil {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 2.5rem;
+    margin-top: 5rem;
+}
+
+.pil article {
+    border-top: 1px solid currentColor;
+    padding-top: 1.4rem;
+}
+
+.pil article.in:hover { transform: translateY(-8px); }
+
+.pil span {
+    font: italic 1.3rem var(--d);
+    color: var(--acc);
+}
+
+.pil h3 {
+    font-size: 2.1rem;
+    margin: 0.5rem 0 0.6rem;
+}
+
+.pil p {
+    margin: 0;
+    opacity: 0.8;
+    max-width: 28ch;
+}
+
+
+/* ---------- 10. Menu ---------- */
+
+.sub {
+    max-width: 40ch;
+    margin: 1rem 0 2.5rem;
+}
+
+/* Pill-shaped tab group */
+.tabs {
+    display: flex;
+    position: relative;
+    width: fit-content;
+    border: 1px solid currentColor;
+    border-radius: 99px;
+    padding: 0.25rem;
+    margin-bottom: 2.5rem;
+    flex-wrap: wrap;
+}
+
+.tab {
+    position: relative;
+    z-index: 1;
+    border: 0;
+    background: none;
+    color: inherit;
+    font: 400 1rem var(--m);
+    letter-spacing: 0.04em;
+    padding: 0.55rem 1.4rem;
+    border-radius: 99px;
+    cursor: pointer;
+    transition: color 0.3s;
+}
+
+.tab[aria-selected="true"] { color: #F3E6D8; }
+
+/* Sliding highlight behind the active tab (position set by script.js) */
+#ind {
+    position: absolute;
+    top: 0.25rem;
+    bottom: 0.25rem;
+    left: 0;
+    width: 0;
+    background: #3B2417;
+    border-radius: 99px;
+    transition: left 0.4s cubic-bezier(0.6, 0, 0.2, 1), width 0.4s cubic-bezier(0.6, 0, 0.2, 1);
+}
+
+#list {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    max-width: 54rem;
+    min-height: 26rem; /* prevents layout jump when switching tabs */
+}
+
+/* Menu row: name + description | price | Add button */
+#list li {
+    display: grid;
+    grid-template-columns: 1fr auto auto;
+    gap: 1.4rem;
+    align-items: center;
+    padding: 1.1rem 0;
+    border-bottom: 1px solid color-mix(in srgb, currentColor 30%, transparent);
+    transition: padding 0.3s;
+    animation: row-in 0.5s both;
+    animation-delay: calc(var(--i) * 0.06s);
+}
+
+@keyframes row-in {
+    from {
+        opacity: 0;
+        transform: translateY(14px);
+    }
+}
+
+#list li:hover { padding-left: 1rem; }
+
+#list h3 { font-size: 1.7rem; }
+
+#list p {
+    margin: 0.2rem 0 0;
+    opacity: 0.75;
+    font-size: 1rem;
+}
+
+.pr { font: 500 1.15rem var(--m); } /* price */
+
+.add {
+    width: 6.5rem;
+    font: 400 0.9rem var(--m);
+    letter-spacing: 0.04em;
+    border: 1px solid currentColor;
+    background: none;
+    color: inherit;
+    border-radius: 99px;
+    padding: 0.45rem 0;
+    cursor: pointer;
+    transition: background 0.25s, color 0.25s, transform 0.15s;
+}
+
+.add:hover,
+.add.ok {
+    background: #3B2417;
+    color: #F3E6D8;
+}
+
+.add:active { transform: scale(0.92); }
+
+/* Loading skeleton rows */
+.sk {
+    display: block;
+    height: 1rem;
+    border-radius: 6px;
+    background: linear-gradient(90deg, #0002 25%, #0004 50%, #0002 75%) 0 0 / 200% 100%;
+    animation: shimmer 1.1s linear infinite;
+}
+
+@keyframes shimmer { to { background-position: -200% 0; } }
+
+#list li.skl { animation: none; }
+
+#list li.skl div {
+    display: grid;
+    gap: 0.6rem;
+}
+
+
+/* ---------- 11. Bakery feature ---------- */
+
+#bake {
+    overflow: hidden;
+    min-height: 90svh;
+    display: flex;
+    align-items: center;
+}
+
+/* Giant background text that drifts sideways (moved by script.js) */
+.gh {
+    position: absolute;
+    left: 0;
+    top: 50%;
+    translate: 0 -50%;
+    white-space: nowrap;
+    font: italic 400 clamp(9rem, 26vw, 24rem)/1 var(--d);
+    opacity: 0.07;
+    will-change: transform;
+}
+
+.bk {
+    position: relative;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 3rem;
+    align-items: center;
+    width: 100%;
+}
+
+.bk p {
+    max-width: 34ch;
+    margin: 1.5rem 0 0;
+    opacity: 0.85;
+}
+
+/* Floating croissant illustration */
+#cr {
+    width: 100%;
+    max-width: 30rem;
+    justify-self: center;
+    animation: float 5s ease-in-out infinite;
+}
+
+@keyframes float {
+    50% { transform: translateY(-14px) rotate(-2deg); }
+}
+
+/* Steam wisps rising from the croissant (--s staggers each wisp) */
+.st {
+    fill: none;
+    stroke: #FBF8F4;
+    stroke-width: 4;
+    stroke-linecap: round;
+    stroke-dasharray: 50 120;
+    animation: steam 3.2s ease-in-out infinite;
+    animation-delay: calc(var(--s) * 0.8s);
+    opacity: 0.6;
+}
+
+@keyframes steam {
+    0%   { stroke-dashoffset: 170; opacity: 0; }
+    30%  { opacity: 0.7; }
+    100% { stroke-dashoffset: -10; opacity: 0; transform: translateY(-12px); }
+}
+
+
+/* ---------- 12. Call to action ---------- */
+
+.cta {
+    text-align: center;
+    padding: 9rem clamp(1.2rem, 5vw, 4rem);
+}
+
+.cta h2 {
+    max-width: 14ch;
+    margin: 0 auto 2.5rem;
+}
+
+
+/* ---------- 13. Find us ---------- */
+
+.fg {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 4rem;
+    margin-top: 3rem;
+    align-items: center;
+}
+
+/* Hours / location / contact list */
+dl {
+    margin: 0;
+    display: grid;
+    grid-template-columns: 7rem 1fr;
+    gap: 1.6rem 1.5rem;
+}
+
+dt {
+    font: italic 400 1.4rem var(--d);
+    color: var(--acc);
+}
+
+dd { margin: 0; }
+
+/* Stylised map */
+#map {
+    width: 100%;
+    border: 1px solid #FBF8F433;
+}
+
+.rd { /* roads */
+    fill: none;
+    stroke: #FBF8F4;
+    stroke-opacity: 0.18;
+    stroke-width: 6;
+}
+
+.pu { /* pulsing ring around the pin */
+    transform-box: fill-box;
+    transform-origin: center;
+    animation: pulse 2.2s ease-out infinite;
+}
+
+@keyframes pulse {
+    from { transform: scale(0.3); opacity: 0.9; }
+    to   { transform: scale(2.6); opacity: 0; }
+}
+
+/* Social links row */
+.share {
+    margin-top: 6rem;
+    padding-top: 2rem;
+    border-top: 1px solid #FBF8F433;
+    display: flex;
+    justify-content: space-between;
+    gap: 2rem;
+    flex-wrap: wrap;
+    align-items: center;
+}
+
+.share h3 { font-size: clamp(1.8rem, 4vw, 3rem); }
+
+.share div {
+    display: flex;
+    gap: 1.6rem;
+}
+
+
+/* ---------- 14. Footer and toast ---------- */
+
+footer {
+    padding: 1.5rem clamp(1.2rem, 5vw, 4rem) 2rem;
+    font-size: 0.9rem;
+    opacity: 0.7;
+    background: #1F120B;
+    color: #FBF8F4;
+}
+
+/* Pop-up message at the bottom of the screen; slides in when .show is added */
+#toast {
+    position: fixed;
+    left: 50%;
+    bottom: calc(1.5rem + env(safe-area-inset-bottom, 0px));
+    transform: translate(-50%, 220%);
+    background: #3B2417;
+    color: #F3E6D8;
+    padding: 0.8rem 1.5rem;
+    border-radius: 99px;
+    z-index: 90;
+    cursor: pointer; /* clicking opens the cart */
+    transition: transform 0.5s cubic-bezier(0.2, 0.9, 0.2, 1);
+}
+
+#toast.show { transform: translate(-50%, 0); }
+
+
+/* ---------- 15. Responsive (max-width: 760px) ---------- */
+
+@media (max-width: 760px) {
+    /* Stack two-column layouts */
+    .two, .pil, .fg, .bk { grid-template-columns: 1fr; }
+
+    .pil {
+        gap: 2rem;
+        margin-top: 3rem;
+    }
+
+    nav a:nth-child(1) { display: none; } /* hide "Philosophy" link on small screens */
+
+    /* Menu rows: name | price on the first line, full-width Add button below */
+    #list li { grid-template-columns: 1fr auto; }
+    .pr      { grid-row: 1; grid-column: 2; }
+    .add     { grid-column: 1 / -1; width: 100%; }
+
+    dl  { grid-template-columns: 5.5rem 1fr; }
+    #cr { max-width: 18rem; }
+}
+
+
+/* ---------- 16. Reduced motion and utilities ---------- */
+
+/* Effectively disable animations/transitions for users who ask for less motion */
+@media (prefers-reduced-motion: reduce) {
+    *, *::before, *::after {
+        animation-duration: 0.01ms !important;
+        animation-delay: 0s !important;
+        transition-duration: 0.01ms !important;
+        scroll-behavior: auto !important;
+    }
+
+    /* Show content immediately instead of animating it in */
+    .ln span, .fd, .rv {
+        transform: none;
+        opacity: 1;
+    }
+}
+
+/* Make the [hidden] attribute always win over display rules */
+[hidden] { display: none !important; }
+
+
+/* ---------- 17. Cart page ---------- */
+
+/* The cart is hidden by default; script.js adds body.cv to swap it in for the main site */
+#cartpage {
+    display: none;
+    min-height: 100svh;
+    padding-top: 8rem;
+}
+
+body.cv #cartpage { display: block; }
+
+body.cv > section:not(#cartpage),
+body.cv > .mq { display: none; }
+
+.bl { /* "Continue shopping" link */
+    display: inline-block;
+    font-size: 0.95rem;
+    letter-spacing: 0.06em;
+    text-decoration: none;
+    opacity: 0.75;
+}
+
+.bl:hover { opacity: 1; }
+
+#cartpage h2 { margin-top: 1.2rem; }
+
+/* Two columns: items | order summary */
+.cg {
+    display: grid;
+    grid-template-columns: 1.6fr 1fr;
+    gap: 4rem;
+    align-items: start;
+    margin-top: 2.5rem;
+}
+
+#cl {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+}
+
+/* Cart row: name | quantity | line total | remove */
+#cl li {
+    display: grid;
+    grid-template-columns: 1fr auto auto auto;
+    gap: 1.4rem;
+    align-items: center;
+    padding: 1.3rem 0;
+    border-bottom: 1px solid color-mix(in srgb, currentColor 30%, transparent);
+    animation: row-in 0.5s both;
+    transition: opacity 0.35s, translate 0.35s;
+}
+
+#cl li.out { /* removal animation */
+    opacity: 0;
+    translate: 40px 0;
+}
+
+#cl h3 { font-size: 1.7rem; }
+
+#cl p {
+    margin: 0.2rem 0 0;
+    opacity: 0.7;
+    font-size: 0.95rem;
+}
+
+/* Quantity stepper */
+.qt {
+    display: flex;
+    align-items: center;
+    gap: 0.7rem;
+    border: 1px solid currentColor;
+    border-radius: 99px;
+    padding: 0.2rem 0.45rem;
+}
+
+.qt button {
+    width: 2rem;
+    height: 2rem;
+    border: 0;
+    background: none;
+    color: inherit;
+    font-size: 1.3rem;
+    cursor: pointer;
+    border-radius: 50%;
+    transition: background 0.2s, color 0.2s, transform 0.15s;
+}
+
+.qt button:hover {
+    background: #3B2417;
+    color: #F3E6D8;
+}
+
+.qt button:active { transform: scale(0.85); }
+
+.qt b {
+    min-width: 1.2rem;
+    text-align: center;
+    font-weight: 500;
+}
+
+/* "Remove" text button */
+.rm {
+    border: 0;
+    background: none;
+    color: inherit;
+    opacity: 0.6;
+    font: 300 0.9rem var(--m);
+    text-decoration: underline;
+    cursor: pointer;
+}
+
+.rm:hover { opacity: 1; }
+
+/* Order summary card */
+#cs {
+    background: #FBF8F4;
+    border-radius: 4px;
+    padding: 2rem;
+    position: sticky;
+    top: 6rem;
+}
+
+#cs h3 {
+    font-size: 2rem;
+    margin-bottom: 1.2rem;
+}
+
+.sumr {
+    display: grid;
+    grid-template-columns: 1fr auto;
+    gap: 0.7rem 0;
+    margin: 0 0 1.5rem;
+}
+
+.sumr dt {
+    font: 300 1rem var(--m);
+    color: inherit;
+    opacity: 0.8;
+}
+
+.sumr dd { margin: 0; }
+
+/* Emphasise the final "Total" row */
+.sumr dt:last-of-type,
+.sumr dd:last-of-type {
+    font: 500 1.6rem var(--d);
+    opacity: 1;
+    padding-top: 0.6rem;
+    border-top: 1px solid #3B241733;
+}
+
+/* Name input */
+#nm {
+    width: 90%;
+    font: 300 1rem var(--m);
+    padding: 0.9rem 1.2rem;
+    border: 1px solid #3B241766;
+    border-radius: 99px;
+    background: transparent;
+    color: inherit;
+    margin-bottom: 1rem;
+}
+
+#nm.sh { animation: shake 0.4s; } /* shown when the name is missing */
+
+@keyframes shake {
+    25% { translate: -8px; }
+    75% { translate: 8px; }
+}
+
+#cs .btn {
+    width: 100%;
+    text-align: center;
+}
+
+.nt {
+    font-size: 0.85rem;
+    opacity: 0.65;
+    margin: 1rem 0 0;
+}
+
+/* Empty-cart message */
+.em { padding: 3rem 0; }
+
+.em p {
+    font: 400 clamp(1.6rem, 3vw, 2.4rem) var(--d);
+    margin: 0 0 1.5rem;
+}
+
+/* Order confirmation */
+#ok {
+    max-width: 34rem;
+    padding: 2rem 0;
+}
+
+#ok h3 {
+    font-size: 3rem;
+    margin: 1rem 0;
+}
+
+#ok p { margin: 0 0 2rem; }
+
+#ok svg { width: 5rem; }
+
+/* Tick mark draws itself */
+#ok path {
+    stroke-dasharray: 60;
+    stroke-dashoffset: 60;
+    animation: draw 0.8s 0.2s forwards;
+}
+
+@keyframes draw { to { stroke-dashoffset: 0; } }
+
+
+/* ---------- 18. Page-transition veil ---------- */
+/* script.js toggles .in (cover screen) and .out (reveal) around the site <-> cart switch */
+
+#veil {
+    position: fixed;
+    inset: 0;
+    z-index: 95;
+    background: #1F120B;
+    transform: translateY(100%);
+    pointer-events: none;
+}
+
+#veil.in {
+    transition: transform 0.55s cubic-bezier(0.7, 0, 0.2, 1);
+    transform: none;
+}
+
+#veil.out {
+    transition: transform 0.55s cubic-bezier(0.7, 0, 0.2, 1);
+    transform: translateY(-100%);
+}
+
+
+/* ---------- 19. Cart responsive (max-width: 760px) ---------- */
+
+@media (max-width: 760px) {
+    .cg {
+        grid-template-columns: 1fr;
+        gap: 2rem;
+    }
+
+    #cl li { grid-template-columns: 1fr auto; }
+    #cl .pr { grid-column: 2; grid-row: 1; }
+    .qt     { grid-column: 1; }
+    .rm     { grid-column: 2; justify-self: end; }
+
+    #cs { position: static; }
+}
